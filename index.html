@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#14130f" />
+  <meta name="description" content="CS:GO 1.6 — браузерный шутер по мотивам Counter-Strike 1.6 на карте Dust II." />
+  <title>CS:GO 1.6 — Dust II</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23141511'/%3E%3Cpath d='M8 9h11v4h-7v3h6v4h-6v3h7v4H8z' fill='%23f5a524'/%3E%3Cpath d='M22 9h4v18h-4z' fill='%23f2ecdd'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="menu-open">
+  <div id="app">
+    <canvas id="view" aria-label="Игровой мир"></canvas>
+    <div id="damage" aria-hidden="true"></div>
+    <div id="lowhp" aria-hidden="true"></div>
+
+    <div id="hud" class="hidden">
+      <div class="topbar">
+        <div class="team-counter ct"><span class="dot"></span><span id="roundLabel">РАУНД 1</span></div>
+        <div class="timer" id="timer">1:45</div>
+        <div class="team-counter t"><span id="enemyCount">T: 4</span><span class="dot"></span></div>
+      </div>
+
+      <div id="radarWrap">
+        <canvas id="radar" width="160" height="160"></canvas>
+        <div class="radar-label">DUST II</div>
+        <div class="radar-site site-a">A</div>
+        <div class="radar-site site-b">B</div>
+      </div>
+
+      <div id="killfeed"></div>
+
+      <div id="banner">
+        <div id="bannerTitle" class="banner-title"></div>
+        <div id="bannerSub" class="banner-sub"></div>
+      </div>
+
+      <div id="vitals">
+        <div class="vital">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/></svg>
+          <span id="health">100</span>
+        </div>
+        <div class="vital armor">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5z"/></svg>
+          <span id="armor">100</span>
+        </div>
+        <div class="money" id="money">$800</div>
+      </div>
+
+      <div id="ammo">
+        <div class="weapon-name" id="weaponName">AK-47</div>
+        <div class="ammo-line">
+          <span id="ammoNow">30</span><span class="slash">/</span><span id="ammoReserve">90</span>
+        </div>
+      </div>
+
+      <div id="crosshair" aria-hidden="true">
+        <span class="ch top"></span><span class="ch bottom"></span>
+        <span class="ch left"></span><span class="ch right"></span>
+        <span class="ch dot"></span>
+      </div>
+      <div id="hitmarker" aria-hidden="true"></div>
+
+      <div id="hint">WASD — движение · МЫШЬ — прицел · ЛКМ — огонь · R — перезарядка · 1/2/3 — оружие</div>
+      <div id="roundstate" class="hidden"></div>
+    </div>
+
+    <div id="touch" class="hidden">
+      <div id="joy"><div id="knob"></div></div>
+      <button id="btnFire" class="tbtn fire" aria-label="Огонь">ОГОНЬ</button>
+      <button id="btnReload" class="tbtn side" aria-label="Перезарядка">⟳</button>
+      <button id="btnSwitch" class="tbtn side" aria-label="Сменить оружие">⇄</button>
+      <button id="btnPause" class="tbtn mini" aria-label="Пауза">II</button>
+    </div>
+
+    <section id="menu" class="screen">
+      <div class="menu-scan"></div>
+      <div class="menu-inner">
+        <div class="eyebrow"><span class="live"></span>DUST II · BROWSER EDITION</div>
+        <h1 class="logo">
+          <span class="logo-main">CS<span class="colon">:</span>GO</span>
+          <span class="logo-ver">1.6</span>
+        </h1>
+        <p class="tagline">
+          Классика, которой не было. Контр-террористы, террористы и песок Dust II —
+          прямо в браузере, без установки.
+        </p>
+
+        <div class="menu-actions">
+          <button id="playBtn" class="btn primary">PLAY</button>
+          <div class="menu-mini">
+            <button id="howBtn" class="btn ghost" aria-expanded="false">УПРАВЛЕНИЕ</button>
+            <button id="soundBtn" class="btn ghost">ЗВУК: ВКЛ</button>
+          </div>
+        </div>
+
+        <div id="howPanel" class="how hidden">
+          <div class="how-col">
+            <div class="key-row"><kbd>W A S D</kbd><span>движение</span></div>
+            <div class="key-row"><kbd>МЫШЬ</kbd><span>прицел</span></div>
+            <div class="key-row"><kbd>ЛКМ</kbd><span>стрельба</span></div>
+          </div>
+          <div class="how-col">
+            <div class="key-row"><kbd>R</kbd><span>перезарядка</span></div>
+            <div class="key-row"><kbd>1 2 3</kbd><span>AK / USP / нож</span></div>
+            <div class="key-row"><kbd>SHIFT</kbd><span>бег</span></div>
+          </div>
+          <div class="how-col">
+            <div class="key-row"><kbd>ESC</kbd><span>пауза</span></div>
+            <div class="key-row"><kbd>CTRL</kbd><span>присесть</span></div>
+            <div class="key-row"><kbd>НА ТЕЛЕФОНЕ</kbd><span>джойстик + кнопки</span></div>
+          </div>
+        </div>
+
+        <div class="menu-stats">
+          <div><strong id="menuBestKills">0</strong><span>лучшая серия</span></div>
+          <div><strong id="menuBestRound">0</strong><span>лучший раунд</span></div>
+          <div><strong id="menuBestAcc">0%</strong><span>точность</span></div>
+        </div>
+
+        <div class="credits">Фан-проект. Не связан с Valve. Сделано на canvas + WebAudio.</div>
+      </div>
+      <div class="menu-corner">// TERRORISTS WIN? NOT TODAY.</div>
+    </section>
+
+    <section id="pause" class="screen hidden">
+      <div class="panel">
+        <div class="eyebrow">ТАКТИЧЕСКАЯ ПАУЗА</div>
+        <h2>ПАУЗА</h2>
+        <div class="panel-actions">
+          <button id="resumeBtn" class="btn primary">ПРОДОЛЖИТЬ</button>
+          <button id="pauseSoundBtn" class="btn ghost">ЗВУК: ВКЛ</button>
+          <button id="toMenuBtn" class="btn ghost">В МЕНЮ</button>
+        </div>
+        <p class="panel-note">Раунд, патроны и террористы ждут.</p>
+      </div>
+    </section>
+
+    <section id="gameover" class="screen hidden">
+      <div class="panel wide">
+        <div class="eyebrow danger">ОПЕРАЦИЯ ЗАВЕРШЕНА</div>
+        <h2 id="goTitle">ЛИКВИДИРОВАН</h2>
+        <p id="goReason" class="go-reason">Террористы оказались быстрее.</p>
+        <div class="stats-grid">
+          <div><strong id="goKills">0</strong><span>убийств</span></div>
+          <div><strong id="goHeads">0</strong><span>в голову</span></div>
+          <div><strong id="goAcc">0%</strong><span>точность</span></div>
+          <div><strong id="goRound">1</strong><span>раунд</span></div>
+          <div><strong id="goMoney">$800</strong><span>заработано</span></div>
+        </div>
+        <div class="panel-actions row">
+          <button id="retryBtn" class="btn primary">ЗАНОВО</button>
+          <button id="goMenuBtn" class="btn ghost">В МЕНЮ</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="js/game.js"></script>
+</body>
+</html>
